@@ -17,7 +17,7 @@
 #include "rtc/hal_rtc.hpp"
 #include "sd_card/hal_sd_crad.hpp"
 #include "tp/hal_tp.hpp"
-#include <BMI270.h>
+// #include <BMI270.h>
 extern "C" {
 #include "usb_msc/hal_usb_msc.h"
 }
@@ -60,8 +60,8 @@ class HAL {
         /* Buzzer */
         BUZZER::BUZZER buzz;
 
-        /* IMU BMM270 + BMM150 */
-        BMI270::BMI270 imu;
+        // /* IMU BMM270 + BMM150 */
+        // BMI270::BMI270 imu;
 
         /* Lvgl */
         LVGL::LVGL lvgl;
@@ -75,14 +75,14 @@ class HAL {
 
 
         /**
-         * @brief Update hal
+         * @brief Hal update
          * 
          */
         void update();
 
 
         /**
-         * @brief Normal or USB MSC mode 
+         * @brief Check boot mode
          * 
          */
         void checkBootMode();

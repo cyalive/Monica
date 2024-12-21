@@ -13,7 +13,7 @@
 
 /* I2C peripheral */
 #define HAL_PIN_I2C_PORT    0
-#define HAL_PIN_I2C_SCL     10
+#define HAL_PIN_I2C_SCL     12
 #define HAL_PIN_I2C_SDA     11
 
 /* Touch pad */
@@ -24,23 +24,21 @@
 #define HAL_PIN_AXP_INTR    14
 
 /* RTC PCF8563 */
-#define HAL_PIN_RTC_INTR    41
+#define HAL_PIN_RTC_INTR    9
 
 /* IMU BMI270 */
 #define HAL_PIN_IMU_INTR1   38
 #define HAL_PIN_IMU_INTR2   40
 
 /* Buzzer */
-#define HAL_PIN_BUZZER      45
+#define HAL_PIN_BUZZER      46
 
 /* Mic */
 #define HAL_PIN_MIC         42
 
-/* SD card */
-#define HAL_PIN_SD_CD       47
-#define HAL_PIN_SD_CLK      15
-#define HAL_PIN_SD_CMD      16
-#define HAL_PIN_SD_D0       17
-#define HAL_PIN_SD_D1       18
-#define HAL_PIN_SD_D2       48
-#define HAL_PIN_SD_D3       21
+/* SD card (SPI Mode) */
+#define HAL_PIN_SD_CD       17      // Card Detect pin
+#define HAL_PIN_SD_SCK      15      // SPI Clock
+#define HAL_PIN_SD_MOSI     6       // SPI MOSI
+#define HAL_PIN_SD_MISO     16      // SPI MISO
+#define HAL_PIN_SD_CS       5      // SPI Chip Select

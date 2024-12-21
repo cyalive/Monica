@@ -36,33 +36,29 @@ void HAL::init()
     btnA.begin();
     btnB.begin();
 
-
     /* Once button and power setup, check boot mode */
     checkBootMode();
-
 
     /* RTC PCF8563 */
     rtc.init(HAL_PIN_I2C_SDA, HAL_PIN_I2C_SCL, HAL_PIN_RTC_INTR);
 
-
     /* Buzzer */
     buzz.init(HAL_PIN_BUZZER);
-
 
     /* SD card */
     sd.init();
 
-
     /* Lvgl */
     lvgl.init(&disp, &tp);
 
+    // /* IMU BMI270 + BMM150 */
+    // imu.init();
+    // /* Setup wrist wear wakeup interrupt */
+    // imu.setWristWearWakeup();
+    // /* Enable step counter */
+    // imu.enableStepCounter();
 
-    /* IMU BMI270 + BMM150 */
-    imu.init();
-    /* Setup wrist wear wakeup interrupt */
-    imu.setWristWearWakeup();
-    /* Enable step counter */
-    imu.enableStepCounter();
+
 
 
 }
@@ -112,10 +108,8 @@ void HAL::checkBootMode()
             disp.setTextSize(2);
             disp.printf("\n\n\n%s\n\n\n\n Press to quit            ->", disk_ascii.c_str());
 
-
             /* Enable usb msc */
             hal_enter_usb_msc_mode();
-
 
             /* Simply restart make usb not vailable, dont know why */
             pmu.powerOff();

@@ -18,50 +18,50 @@
 #include <esp_vfs_fat.h>
 #include <sdmmc_cmd.h>
 #include <driver/sdmmc_host.h>
-
+#include <driver/spi_common.h>
+#include <driver/sdspi_host.h>
+#include <driver/gpio.h>
 
 namespace SD_CARD {
 
-
     static const char* TAG = "SD";
-
 
     struct Config_t {
         int CD = HAL_PIN_SD_CD;
-        int CLK = HAL_PIN_SD_CLK;
-        int CMD = HAL_PIN_SD_CMD;
-        int D0 = HAL_PIN_SD_D0;
-        int D1 = HAL_PIN_SD_D1;
-        int D2 = HAL_PIN_SD_D2;
-        int D3 = HAL_PIN_SD_D3;
+        int SCK = HAL_PIN_SD_SCK;
+        int MOSI = HAL_PIN_SD_MOSI;
+        int MISO = HAL_PIN_SD_MISO;
+        int CS = HAL_PIN_SD_CS;
 
         std::string mountPoint = "/sdcard";
         bool formatIfMountFailed = true;
     };
-
 
     class SD_Card {
         private:
             Config_t _config;
             bool _available;
 
-
         public:
             SD_Card() : _available(false) {}
             ~SD_Card() = default;
 
-
             inline void config(Config_t cfg) { _config = cfg; }
             inline Config_t config(void) { return _config; }
 
-
             inline bool isAvailable() { return _available; }
-
-
 
             inline void init()
             {
                 esp_err_t ret;
+
+                // Check if SD card is inserted
+                gpio_set_direction((gpio_num_t)_config.CD, GPIO_MODE_INPUT);
+                gpio_set_pull_mode((gpio_num_t)_config.CD, GPIO_PULLUP_ONLY);
+                if (gpio_get_level((gpio_num_t)_config.CD) == 1) {
+                    ESP_LOGW(TAG, "No SD card inserted");
+                    return;
+                }
 
                 // Options for mounting the filesystem.
                 // If format_if_mount_failed is set to true, SD card will be partitioned and
@@ -79,38 +79,38 @@ namespace SD_CARD {
                 // Please check its source code and implement error recovery when developing
                 // production applications.
 
-                ESP_LOGI(TAG, "Using SDMMC peripheral");
+                ESP_LOGI(TAG, "Using SPI peripheral");
 
-                // By default, SD card frequency is initialized to SDMMC_FREQ_DEFAULT (20MHz)
-                // For setting a specific frequency, use host.max_freq_khz (range 400kHz - 40MHz for SDMMC)
-                // Example: for fixed frequency of 10MHz, use host.max_freq_khz = 10000;
-                sdmmc_host_t host = SDMMC_HOST_DEFAULT();
-                // host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+                // Only set CD pin as input, no need for internal pullups as external ones are present
+                gpio_set_direction((gpio_num_t)_config.CD, GPIO_MODE_INPUT);
+
+                sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+                spi_bus_config_t bus_cfg = {
+                    .mosi_io_num = _config.MOSI,   // MOSI line
+                    .miso_io_num = _config.MISO,   // MISO line
+                    .sclk_io_num = _config.SCK,    // SCK line
+                    .quadwp_io_num = -1,
+                    .quadhd_io_num = -1,
+                    .max_transfer_sz = 4000,
+                };
+                ret = spi_bus_initialize((spi_host_device_t)SPI3_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+                if (ret != ESP_OK) {
+                    ESP_LOGE(TAG, "Failed to initialize bus.");
+                    return;
+                }
 
                 // This initializes the slot without card detect (CD) and write protect (WP) signals.
-                // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
-                sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
-
-                // Set bus width to use:
-                slot_config.width = 4;
-
-                // On chips where the GPIOs used for SD card can be configured, set them in
-                // the slot_config structure:
-                slot_config.clk = (gpio_num_t)_config.CLK;
-                slot_config.cmd = (gpio_num_t)_config.CMD;
-                slot_config.d0 = (gpio_num_t)_config.D0;
-                slot_config.d1 = (gpio_num_t)_config.D1;
-                slot_config.d2 = (gpio_num_t)_config.D2;
-                slot_config.d3 = (gpio_num_t)_config.D3;
-                // slot_config.cd = (gpio_num_t)_config.CD;
+                sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
+                slot_config.gpio_cs = (gpio_num_t)_config.CS;     // CS pin
+                slot_config.host_id = (spi_host_device_t)SPI3_HOST;  // 使用SPI3_HOST
 
                 ESP_LOGI(TAG, "Mounting filesystem");
-                ret = esp_vfs_fat_sdmmc_mount(_config.mountPoint.c_str(), &host, &slot_config, &mount_config, &card);
+                ret = esp_vfs_fat_sdspi_mount(_config.mountPoint.c_str(), &host, &slot_config, &mount_config, &card);
 
                 if (ret != ESP_OK) {
                     if (ret == ESP_FAIL) {
                         ESP_LOGE(TAG, "Failed to mount filesystem. "
-                                "If you want the card to be formatted, set the EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
+                                "If you want the card to be formatted, set formatIfMountFailed to true.");
                     } else {
                         ESP_LOGE(TAG, "Failed to initialize the card (%s). "
                                 "Make sure SD card lines have pull-up resistors in place.", esp_err_to_name(ret));
@@ -122,56 +122,9 @@ namespace SD_CARD {
                 // Card has been initialized, print its properties
                 sdmmc_card_print_info(stdout, card);
 
-
                 _available = true;
-
-
-                // /* Test */
-                // std::string path = "/sdcard/nihao.txt";
-
-                // ESP_LOGI(TAG, "Opening file %s", path.c_str());
-                // FILE *f = fopen(path.c_str(), "w");
-                // if (f == NULL) {
-                //     ESP_LOGE(TAG, "Failed to open file for writing");
-                    
-                // }
-                // fprintf(f, "nihao ????????????");
-                // fclose(f);
-                // ESP_LOGI(TAG, "File written");
-
-
-
-                // // std::string path = "/sdcard/nihao.txt";
-                // std::string path = "/sdcard/app_icons/app_icon_hdpi_canvas.png";
-                // FILE *f = fopen(path.c_str(), "r");
-                // if (f == NULL) {
-                //     ESP_LOGE(TAG, "Failed to open file for reading");
-                    
-                //     while (1) {
-                //         vTaskDelay(10);
-                //     }
-                // }
-                // char* line = new char[2048];
-                // fgets(line, 2048, f);
-                // fclose(f);
-
-                // // strip newline
-                // char *pos = strchr(line, '\n');
-                // if (pos) {
-                //     *pos = '\0';
-                // }
-                // ESP_LOGI(TAG, "Read from file: '%s'", line);
-                
-
-
-                // while (1) {
-                //     vTaskDelay(10);
-                // }
-
             }
 
     };
 
-
 }
-

@@ -45,7 +45,7 @@ Contributors:
 // #include "v1/panel/Panel_SSD1351.hpp"
 // #include "v1/panel/Panel_SSD1963.hpp"
 // #include "v1/panel/Panel_ST7735.hpp"
-// #include "v1/panel/Panel_ST7789.hpp"
+#include "v1/panel/Panel_ST7789.hpp"
 // #include "v1/panel/Panel_ST7796.hpp"
 
 // // EPD
@@ -55,7 +55,7 @@ Contributors:
 // other
 // #include "v1/panel/Panel_HUB75.hpp"
 // #include "v1/panel/Panel_M5UnitLCD.hpp"
-#include "v1/panel/Panel_SH8601Z.hpp"
+//#include "v1/panel/Panel_SH8601Z.hpp"
 
 // // TouchScreen
 // #include "v1/touch/Touch_FT5x06.hpp"

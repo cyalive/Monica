@@ -15,7 +15,6 @@
 
 namespace HM {
 
-
     struct RtcData_t {
         /* update time in 1Hz */
         int64_t update_interval = 1000000;
@@ -32,12 +31,12 @@ namespace HM {
     };
 
 
-    struct ImuData_t {
-        /* update IMU data in 50Hz */
-        int64_t update_interval = 20;
-        int64_t update_count = 0;
-        uint32_t* steps = nullptr;
-    };
+    // struct ImuData_t {
+    //     /* update IMU data in 50Hz */
+    //     int64_t update_interval = 20;
+    //     int64_t update_count = 0;
+    //     uint32_t* steps = nullptr;
+    // };
 
 
     enum PowerMode_t {
@@ -78,13 +77,13 @@ namespace HM {
             RtcData_t _rtc_data;
             PowerInfos_t _power_infos;
             PowerManager_t _power_manager;
-            ImuData_t _imu_data;
+            // ImuData_t _imu_data;
             SystemData_t _system_data;
             KeyData_t _key_data;
 
 
             void _update_rtc_time();
-            void _update_imu_data();
+            // void _update_imu_data();
             void _update_power_infos();
 
             void _update_go_sleep();

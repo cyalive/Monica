@@ -19,9 +19,7 @@
 
 namespace HM {
 
-
     static const char* TAG = "HM";
-
 
     void Hardware_Manager::_update_rtc_time()
     {
@@ -67,20 +65,17 @@ namespace HM {
         _update_power_infos();
     }
 
-
-    void Hardware_Manager::_update_imu_data()
-    {
-        /* Read IMU */
-        *_imu_data.steps = imu.getSteps();
-    }
-
+    // void Hardware_Manager::_update_imu_data()
+    // {
+    //     /* Read IMU */
+    //     *_imu_data.steps = imu.getSteps();
+    // }
 
     void Hardware_Manager::_update_power_infos()
     {
         *_power_infos.battery_level_ptr = pmu.batteryLevel();
         *_power_infos.battery_is_charging_ptr = pmu.isCharging();
     }
-
 
     void Hardware_Manager::_update_go_sleep()
     {
@@ -90,7 +85,6 @@ namespace HM {
         }
     
     }
-
 
     void Hardware_Manager::_update_power_mode()
     {
@@ -130,7 +124,7 @@ namespace HM {
 
             /* Update data at once */
             _update_rtc_time();
-            _update_imu_data();
+            // _update_imu_data();
             /* Clear key pwr */
             pmu.isKeyPressed();
 
@@ -159,7 +153,6 @@ namespace HM {
         }
     }
 
-
     void Hardware_Manager::_update_key_data()
     {
         /* Key Home or Power */
@@ -179,7 +172,6 @@ namespace HM {
         }
     }
 
-
     void Hardware_Manager::setMooncake(MOONCAKE::Mooncake* mooncake)
     {
         if (mooncake == nullptr) {
@@ -187,7 +179,6 @@ namespace HM {
             return;
         }
         _mooncake = mooncake;
-
 
         /* Get data's pointer in database */
 
@@ -199,8 +190,8 @@ namespace HM {
         _power_infos.battery_level_ptr = (uint8_t*)getDatabase()->Get(MC_BATTERY_LEVEL)->addr;
         _power_infos.battery_is_charging_ptr = (bool*)getDatabase()->Get(MC_BATTERY_IS_CHARGING)->addr;
 
-        /* IMU */
-        _imu_data.steps = (uint32_t*)getDatabase()->Get(MC_STEPS)->addr;
+        // /* IMU */
+        // _imu_data.steps = (uint32_t*)getDatabase()->Get(MC_STEPS)->addr;
 
         /* System data */
         _system_data.just_wake_up_ptr = (bool*)getDatabase()->Get(MC_JUST_WAKEUP)->addr;
@@ -212,13 +203,11 @@ namespace HM {
         _key_data.key_down_ptr = (bool*)getDatabase()->Get(MC_KEY_DOWN)->addr;
     }
 
-
     void Hardware_Manager::init()
     {
         HAL::init();
     }
 
-    
     void Hardware_Manager::update()
     {
         /* Update RTC */
@@ -227,18 +216,17 @@ namespace HM {
             _rtc_data.update_count = esp_timer_get_time();
         }
         
-        /* Update IMU */
-        if ((esp_timer_get_time() - _imu_data.update_count) > _imu_data.update_interval) {
-            _update_imu_data();
-            _imu_data.update_count = esp_timer_get_time();
-        }
+        // /* Update IMU */
+        // if ((esp_timer_get_time() - _imu_data.update_count) > _imu_data.update_interval) {
+        //     _update_imu_data();
+        //     _imu_data.update_count = esp_timer_get_time();
+        // }
 
         /* Update keys */
         if ((esp_timer_get_time() - _key_data.update_count) > _key_data.update_interval) {
             _update_key_data();
             _key_data.update_count = esp_timer_get_time();
         }
-
 
         /* Update power control */
         _update_go_sleep();
@@ -247,8 +235,5 @@ namespace HM {
         /* HAL update */
         HAL::update();
     }
-
-
-    
 
 }
