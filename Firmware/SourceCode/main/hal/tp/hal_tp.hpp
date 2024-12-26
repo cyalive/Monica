@@ -2,10 +2,6 @@
 #include <driver/i2c.h>
 #include <esp_log.h>
 #include <cstring>
-#include "hal_tp_cst816.hpp"
-
-/* Use CST816T driver */
-using namespace CST816T;
 
 /**
  * @file hal_tp.hpp
@@ -17,11 +13,21 @@ using namespace CST816T;
  * @copyright Copyright (c) 2023
  * 
  */
+
+// 先声明命名空间
+namespace CST816T {
+    class TP_CST816T;
+}
+
+// 然后包含实现文件
+#include "hal_tp_cst816.hpp"
+
+// 最后使用命名空间
+using namespace CST816T;
+
 namespace FT3168 {
 
-
     static const char* TAG = "FT3168";
-
 
     struct Config_t {
         int pin_scl     = -1;
@@ -31,11 +37,10 @@ namespace FT3168 {
         bool pull_up_en = false;
 
         i2c_port_t i2c_port = 0;
-        uint32_t clk_speed = 100000;
+        uint32_t clk_speed = 400000;  // Default to 400kHz for better performance
 
         uint8_t dev_addr = 0x38;
     };
-
 
     struct TouchPoint_t {
         uint8_t event = 0;
@@ -44,13 +49,11 @@ namespace FT3168 {
         int y = -1;
     };
 
-
     class TP_FT3168 {
         private:
             Config_t _cfg;
             bool _inited;
             uint8_t _data_buffer[7];
-
 
             inline esp_err_t _writrReg(uint8_t reg, uint8_t data)
             {
@@ -59,13 +62,11 @@ namespace FT3168 {
                 return i2c_master_write_to_device(_cfg.i2c_port, _cfg.dev_addr, _data_buffer, 2, portMAX_DELAY);
             }
 
-
             inline esp_err_t _readReg(uint8_t reg, uint8_t readSize)
             {
                 /* Store data into buffer */
                 return i2c_master_write_read_device(_cfg.i2c_port, _cfg.dev_addr, &reg, 1, _data_buffer, readSize, portMAX_DELAY);
             }
-
 
             inline void _initSetup()
             {
@@ -75,12 +76,10 @@ namespace FT3168 {
                 _writrReg(0x80, 0x7D);
             }
 
-
         public:
             TP_FT3168(): _inited(false) {}
             ~TP_FT3168() {}
 
-            
             /* Config */
             inline Config_t config() { return _cfg; }
             inline void config(const Config_t& cfg) { _cfg = cfg; }
@@ -92,14 +91,12 @@ namespace FT3168 {
                 _cfg.pin_int = intr;
             }
 
-
-            inline bool init(const int& sda, const int& scl, const int& rst = -1, const int& intr = -1, const bool& initI2c = true, const uint32_t& speed = 100000)
+            inline bool init(const int& sda, const int& scl, const int& rst = -1, const int& intr = -1, const bool& initI2c = true, const uint32_t& speed = 400000)
             {
                 _cfg.clk_speed = speed;
                 setPin(sda, scl, rst, intr);
                 return init(initI2c);
             }
-
 
             inline bool init(bool initI2c)
             {
@@ -121,7 +118,6 @@ namespace FT3168 {
                 _inited = true;
                 return true;
             }
-
 
             inline bool i2cInit()
             {
@@ -160,7 +156,6 @@ namespace FT3168 {
                 return true;
             }
 
-
             /* Setup gpio and reset */
             inline void gpioInit()
             {
@@ -184,7 +179,6 @@ namespace FT3168 {
                 }
             }
 
-
             inline void deInit(bool deInitI2c = false)
             {
                 _inited = false;
@@ -192,7 +186,6 @@ namespace FT3168 {
                     i2c_driver_delete(_cfg.i2c_port);
                 }
             }
-
 
             inline bool isTouched()
             {
@@ -202,7 +195,6 @@ namespace FT3168 {
                 _readReg(0x00, 7);
                 return (_data_buffer[2] != 0x00) ? true : false;
             }
-
 
             inline void getTouchRaw(TouchPoint_t& tp)
             {
@@ -226,6 +218,5 @@ namespace FT3168 {
             }
 
     };
-
 
 }

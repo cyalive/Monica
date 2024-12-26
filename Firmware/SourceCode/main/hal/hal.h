@@ -12,11 +12,12 @@
 #include "button/Button.h"
 #include "buzzer/hal_buzzer.hpp"
 #include "disp/hal_disp.hpp"
+#include "tp/hal_tp_cst816.hpp"
 #include "lvgl/hal_lvgl.hpp"
 #include "power/hal_power.hpp"
 #include "rtc/hal_rtc.hpp"
 #include "sd_card/hal_sd_crad.hpp"
-#include "tp/hal_tp.hpp"
+// #include "tp/hal_tp.hpp"
 // #include <BMI270.h>
 extern "C" {
 #include "usb_msc/hal_usb_msc.h"
@@ -42,7 +43,7 @@ class HAL {
         LGFX_Monica disp;
 
         /* Touch pad */
-        FT3168::TP_FT3168 tp;
+        CST816T::TP_CST816T tp;
 
         /* PMU AXP2101 */
         AXP2101::AXP2101 pmu;
@@ -54,8 +55,7 @@ class HAL {
         SD_CARD::SD_Card sd;
 
         /* Buttons */
-        Button btnA = Button(GPIO_NUM_0);
-        Button btnB = Button(GPIO_NUM_39);
+        Button btnA = Button(GPIO_NUM_0, 100, 1000);  // GPIO 0, debounce 100ms, long press 1000ms
 
         /* Buzzer */
         BUZZER::BUZZER buzz;

@@ -12,20 +12,18 @@
 #include <esp_log.h>
 #include <lvgl.h>
 #include "../disp/hal_disp.hpp"
-#include "../tp/hal_tp.hpp"
+#include "../tp/hal_tp_cst816.hpp"
 
 #include "lv_demos.h"
 
 
 namespace LVGL {
 
-
     static const char* TAG = "LVGL";
-
     static lgfx::LGFX_Device* _disp;
-    static FT3168::TP_FT3168* _tp;
-    static FT3168::TouchPoint_t _tpp;
-
+    static CST816T::TP_CST816T* _tp;
+    static int x_pos;
+    static int y_pos;
 
     class LVGL {
         private:
@@ -37,7 +35,7 @@ namespace LVGL {
                 uint32_t w = ( area->x2 - area->x1 + 1 );
                 uint32_t h = ( area->y2 - area->y1 + 1 );
 
-                _disp->startWrite();
+                    _disp->startWrite();
                 _disp->setWindow(area->x1, area->y1, area->x2, area->y2);
                 _disp->pushPixels(&color_p->full, w * h, true);
                 _disp->endWrite();
@@ -51,15 +49,16 @@ namespace LVGL {
             /*Will be called by the library to read the touchpad*/
             static void _touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
             {
-                _tp->getTouchRaw(_tpp);
-                if(_tpp.x != -1) {
-                    // printf("%d %d\n", tpp.x, tpp.y);
-                    data->point.x = _tpp.x;
-                    data->point.y = _tpp.y;
+                if(_tp->isTouched()) {
+                    _tp->getPos(x_pos, y_pos);
+                    data->point.x = x_pos;
+                    data->point.y = y_pos;
                     data->state = LV_INDEV_STATE_PR;
+                    ESP_LOGD(TAG, "Touch pressed: x=%d, y=%d", x_pos, y_pos);
                 }
                 else {
                     data->state = LV_INDEV_STATE_REL;
+                    // ESP_LOGD(TAG, "Touch released");
                 }
             }
 
@@ -148,7 +147,7 @@ namespace LVGL {
              * @param disp 
              * @param tp 
              */
-            inline void init(lgfx::LGFX_Device* disp, FT3168::TP_FT3168* tp)
+            inline void init(lgfx::LGFX_Device* disp, CST816T::TP_CST816T* tp)
             { 
                 _disp = disp;
                 _tp = tp;

@@ -161,13 +161,16 @@ namespace HM {
             *_key_data.key_pwr_ptr = true;
         }
 
-        /* Key Up */
+        /* Read button state */
+        btnA.read();
+
+        /* Check for short press (Up key) */
         if (btnA.pressed()) {
             *_key_data.key_up_ptr = true;
         }
 
-        /* Key Down */
-        if (btnB.pressed()) {
+        /* Check for long press (Down key) */
+        if (btnA.isLongPressed()) {
             *_key_data.key_down_ptr = true;
         }
     }
@@ -211,10 +214,11 @@ namespace HM {
     void Hardware_Manager::update()
     {
         /* Update RTC */
-        if ((esp_timer_get_time() - _rtc_data.update_count) > _rtc_data.update_interval) {
-            _update_rtc_time();
-            _rtc_data.update_count = esp_timer_get_time();
-        }
+        // Temporarily disable RTC update as it requires mooncake database
+        // if ((esp_timer_get_time() - _rtc_data.update_count) > _rtc_data.update_interval) {
+        //     _update_rtc_time();
+        //     _rtc_data.update_count = esp_timer_get_time();
+        // }
         
         // /* Update IMU */
         // if ((esp_timer_get_time() - _imu_data.update_count) > _imu_data.update_interval) {

@@ -83,13 +83,13 @@ public:
 
   // コンストラクタを作成し、ここで各種設定を行います。
   // クラス名を変更した場合はコンストラクタも同じ名前を指定してください。
-LGFX_Monica(void)
+  LGFX_Monica(void)
   {
     { // バス制御の設定を行います。
       auto cfg = _bus_instance.config();    // バス設定用の構造体を取得します。
 
 // SPIバスの設定
-      cfg.spi_host = SPI2_HOST;     // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
+      cfg.spi_host = SPI3_HOST;     // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
       // ※ ESP-IDFバージョンアップに伴い、VSPI_HOST , HSPI_HOSTの記述は非推奨になるため、エラーが出る場合は代わりにSPI2_HOST , SPI3_HOSTを使用してください。
       cfg.spi_mode = 2;             // SPI通信モードを設定 (0 ~ 3)
       cfg.freq_write = 80000000;    // 送信時のSPIクロック (最大80MHz, 80MHzを整数で割った値に丸められます)
@@ -129,7 +129,7 @@ LGFX_Monica(void)
       cfg.pin_d6 = 27;              // D6を接続しているピン番号
       cfg.pin_d7 = 14;              // D7を接続しているピン番号
 //*/
-
+      
       _bus_instance.config(cfg);    // 設定値をバスに反映します。
       _panel_instance.setBus(&_bus_instance);      // バスをパネルにセットします。
     }
@@ -150,11 +150,11 @@ LGFX_Monica(void)
       cfg.offset_rotation  =     1;  // 回転方向の値のオフセット 0~7 (4~7は上下反転)
       cfg.dummy_read_pixel =     8;  // ピクセル読出し前のダミーリードのビット数
       cfg.dummy_read_bits  =     1;  // ピクセル以外のデータ読出し前のダミーリードのビット数
-      cfg.readable         =  true;  // データ読出しが可能な場合 trueに設定
+      cfg.readable         = true;  // データ読出しが可能な場合 trueに設定
       cfg.invert           = true;  // パネルの明暗が反転してしまう場合 trueに設定
       cfg.rgb_order        = true;  // パネルの赤と青が入れ替わってしまう場合 trueに設定
       cfg.dlen_16bit       = false;  // 16bitパラレルやSPIでデータ長を16bit単位で送信するパネルの場合 trueに設定
-      cfg.bus_shared       =  true;  // SDカードとバスを共有している場合 trueに設定(drawJpgFile等でバス制御を行います)
+      cfg.bus_shared       = false;  // SDカードとバスを共有している場合 trueに設定(drawJpgFile等でバス制御を行います)
 
 // 以下はST7735やILI9163のようにピクセル数が可変のドライバで表示がずれる場合にのみ設定してください。
 //    cfg.memory_width     =   240;  // ドライバICがサポートしている最大の幅

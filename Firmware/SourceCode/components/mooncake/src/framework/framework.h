@@ -23,8 +23,8 @@ namespace MOONCAKE {
         bool useLauncher = true;
 
         /* Hardware */
-        uint16_t displayHor = 480;
-        uint16_t displayVer = 320;
+        uint16_t displayHor = 280;
+        uint16_t displayVer = 240;
     };
 
 

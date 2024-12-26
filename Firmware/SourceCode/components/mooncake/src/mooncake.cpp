@@ -32,13 +32,13 @@ namespace MOONCAKE {
         app_ptr = new BUILTIN_APP::WF_Spring_Wreath;
         install(app_ptr, nullptr);
 
-        /* Sketchpad */
-        app_ptr = new BUILTIN_APP::Sketchpad;
-        install(app_ptr, nullptr);
+        // /* Sketchpad */
+        // app_ptr = new BUILTIN_APP::Sketchpad;
+        // install(app_ptr, nullptr);
         
-        /* Settings */
-        app_ptr = new BUILTIN_APP::Settings;
-        install(app_ptr, nullptr);
+        // /* Settings */
+        // app_ptr = new BUILTIN_APP::Settings;
+        // install(app_ptr, nullptr);
     }
 
 

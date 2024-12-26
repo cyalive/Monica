@@ -17,8 +17,8 @@
 #define HAL_PIN_I2C_SDA     11
 
 /* Touch pad */
-#define HAL_PIN_TP_RST      3
-#define HAL_PIN_TP_INTR     12
+#define HAL_PIN_TP_RST      -1
+#define HAL_PIN_TP_INTR     3
 
 /* PMU AXP2101 */
 #define HAL_PIN_AXP_INTR    14

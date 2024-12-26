@@ -5,7 +5,6 @@
 */
 
 #include "Button.h"
-// #include <Arduino.h>
 #include <esp_timer.h>
 
 
@@ -13,19 +12,20 @@
 #define digitalRead(pin) (bool)gpio_get_level(pin)
 
 
-Button::Button(gpio_num_t pin, uint16_t debounce_ms)
+Button::Button(gpio_num_t pin, uint16_t debounce_ms, uint32_t long_press_threshold)
 :  _pin(pin)
 ,  _delay(debounce_ms)
 ,  _state(1)
 ,  _ignore_until(0)
 ,  _has_changed(false)
+,  _press_start_time(0)
+,  _is_long_press(false)
+,  _long_press_threshold(long_press_threshold)
 {
 }
 
 void Button::begin()
 {
-	// pinMode(_pin, INPUT_PULLUP);
-
     gpio_reset_pin(_pin);
     gpio_set_direction(_pin, GPIO_MODE_INPUT);
     gpio_set_pull_mode(_pin, GPIO_PULLUP_ONLY);
@@ -49,6 +49,12 @@ bool Button::read()
 		_ignore_until = millis() + _delay;
 		_state = !_state;
 		_has_changed = true;
+
+        // 记录按下时间
+        if (_state == PRESSED) {
+            _press_start_time = millis();
+            _is_long_press = false;
+        }
 	}
 	
 	return _state;
@@ -82,4 +88,19 @@ bool Button::pressed()
 bool Button::released()
 {
 	return (read() == RELEASED && has_changed());
+}
+
+bool Button::isLongPressed()
+{
+    if (_state == PRESSED) {
+        // 检查是否达到长按时间阈值
+        if ((millis() - _press_start_time) >= _long_press_threshold) {
+            return true;
+        }
+    }
+    else {
+        // 按钮释放时重置长按状态
+        _is_long_press = false;
+    }
+    return false;
 }

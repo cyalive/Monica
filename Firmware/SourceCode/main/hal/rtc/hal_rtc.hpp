@@ -86,6 +86,37 @@ namespace PCF8563 {
             {
                 gpioInit();
 
+                ESP_LOGI(TAG, "Initializing RTC with SDA:%d, SCL:%d", _cfg.pin_sda, _cfg.pin_scl);
+
+                // 只配置 I2C 参数，不重新安装驱动
+                i2c_config_t conf = {
+                    .mode = I2C_MODE_MASTER,
+                    .sda_io_num = (gpio_num_t)_cfg.pin_sda,
+                    .scl_io_num = (gpio_num_t)_cfg.pin_scl,
+                    .sda_pullup_en = GPIO_PULLUP_ENABLE,
+                    .scl_pullup_en = GPIO_PULLUP_ENABLE,
+                    .master = {
+                        .clk_speed = 400000  // Use 400kHz for better performance
+                    },
+                    .clk_flags = 0
+                };
+
+                esp_err_t err = i2c_param_config(_cfg.i2c_port, &conf);
+                if (err != ESP_OK) {
+                    ESP_LOGE(TAG, "Failed to configure I2C: %s (0x%X)", esp_err_to_name(err), err);
+                    return false;
+                }
+
+                // 验证与 RTC 的通信
+                uint8_t reg = 0x02;
+                err = i2c_master_write_read_device(_cfg.i2c_port, _cfg.dev_addr, &reg, 1, _data_buffer, 1, portMAX_DELAY);
+                if (err != ESP_OK) {
+                    ESP_LOGE(TAG, "Failed to communicate with RTC (addr:0x%02X): %s (0x%X)", 
+                        _cfg.dev_addr, esp_err_to_name(err), err);
+                    return false;
+                }
+
+                ESP_LOGI(TAG, "RTC communication successful");
                 return true;
             }
 

@@ -147,72 +147,75 @@ class AppTest : public MOONCAKE::APP_BASE {
 extern "C" void app_main(void)
 {
 
-
+    
     /* Hardware init */
     hardware_manager.init();
 
+    // Test display
+    printf("Testing display with red color...\n");
+    hardware_manager.disp.fillScreen(0xFF0000);  // 红色
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    // Create a simple LVGL test UI
+    printf("Creating LVGL test UI...\n");
+    
+    // Create a screen
+    lv_obj_t * scr = lv_obj_create(NULL);
+    lv_scr_load(scr);
+    
+    // Create a button
+    lv_obj_t * btn = lv_btn_create(scr);
+    lv_obj_align(btn, LV_ALIGN_CENTER, 0, 0);
+    
+    // Create a label on the button
+    lv_obj_t * label = lv_label_create(btn);
+    lv_label_set_text(label, "Hello World!");
+    lv_obj_center(label);
+
+    lv_demo_widgets();
+
+    /* Original mooncake code - commented out
     // while (1) {
     //     printf("666\n");
     //     vTaskDelay(1000);
     // }
 
+    // UI framwork init
+    // mooncake_ui.setDisplay(hardware_manager.disp.width(), hardware_manager.disp.height());
+    // mooncake_ui.init();
+    // mooncake_ui.installBuiltinApps();
 
+    // Set to same database
+    // hardware_manager.setMooncake(&mooncake_ui);
 
-
-
-
-    // /* UI framwork init */
-    mooncake_ui.setDisplay(hardware_manager.disp.width(), hardware_manager.disp.height());
-    mooncake_ui.init();
-    mooncake_ui.installBuiltinApps();
-
-
-    /* Set to same database */
-    hardware_manager.setMooncake(&mooncake_ui);
-
-
-
-
-
-
-    /* Install Apps */
-    MOONCAKE::APP_BASE* app_ptr = nullptr;
-
-    
-    app_ptr = new AppTest("333", (void*)&ui_img_app_icon_hdpi_boxing_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("444", (void*)&ui_img_app_icon_hdpi_camera_png);
-    mooncake_ui.install(app_ptr);
-    // app_ptr = new AppTest("555", (void*)&ui_img_app_icon_hdpi_canvas_png);
+    // Install Apps
+    // MOONCAKE::APP_BASE* app_ptr = nullptr;
+    // app_ptr = new AppTest("333", (void*)&ui_img_app_icon_hdpi_boxing_png);
     // mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("111", (void*)&ui_img_app_icon_hdpi_badminton_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("222", (void*)&ui_img_app_icon_hdpi_birdhead_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("666", (void*)&ui_img_app_icon_hdpi_cheers_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("999", (void*)&ui_img_app_icon_hdpi_pingpong_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("1010", (void*)&ui_img_app_icon_hdpi_weather_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("777", (void*)&ui_img_app_icon_hdpi_location_png);
-    mooncake_ui.install(app_ptr);
-    app_ptr = new AppTest("888", (void*)&ui_img_app_icon_hdpi_music_png);
-    mooncake_ui.install(app_ptr);
-    
-
-
-
-
-
-
-
-
+    // app_ptr = new AppTest("444", (void*)&ui_img_app_icon_hdpi_camera_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("111", (void*)&ui_img_app_icon_hdpi_badminton_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("222", (void*)&ui_img_app_icon_hdpi_birdhead_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("666", (void*)&ui_img_app_icon_hdpi_cheers_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("999", (void*)&ui_img_app_icon_hdpi_pingpong_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("1010", (void*)&ui_img_app_icon_hdpi_weather_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("777", (void*)&ui_img_app_icon_hdpi_location_png);
+    // mooncake_ui.install(app_ptr);
+    // app_ptr = new AppTest("888", (void*)&ui_img_app_icon_hdpi_music_png);
+    // mooncake_ui.install(app_ptr);
+    */
 
     while (1) {
-        hardware_manager.update();
-        mooncake_ui.update();
-        vTaskDelay(pdMS_TO_TICKS(2));
+        // printf("Main loop iteration\n");  
+        lv_timer_handler();
+        // hardware_manager.update();
+        // mooncake_ui.update();
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 
 }

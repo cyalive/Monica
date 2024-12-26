@@ -20,7 +20,7 @@ namespace BUZZER {
             uint8_t _pin;
 
         public:
-            BUZZER() : _pin(45) {}
+            BUZZER() : _pin(46) {}
 
             inline void init(int8_t pin) { _pin = pin; }
 
