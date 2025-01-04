@@ -15,6 +15,7 @@
 #include <string>
 #include <sys/unistd.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <esp_vfs_fat.h>
 #include <sdmmc_cmd.h>
 #include <driver/sdmmc_host.h>
@@ -50,6 +51,57 @@ namespace SD_CARD {
             inline Config_t config(void) { return _config; }
 
             inline bool isAvailable() { return _available; }
+
+            void printDirectory(const char* dirPath, int depth = 0)
+            {
+                if (!_available) {
+                    ESP_LOGE(TAG, "SD card not available");
+                    return;
+                }
+
+                DIR* dir = opendir(dirPath);
+                if (!dir) {
+                    ESP_LOGE(TAG, "Failed to open directory: %s", dirPath);
+                    return;
+                }
+
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != NULL) {
+                    // Skip current and parent directory entries
+                    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                        continue;
+                    }
+
+                    // Print indentation based on depth
+                    for (int i = 0; i < depth; i++) {
+                        printf("  ");
+                    }
+
+                    // Get file info
+                    struct stat statbuf;
+                    // Use larger buffer and check path length
+                    char fullPath[512];
+                    int pathLen = snprintf(fullPath, sizeof(fullPath), "%s/%s", dirPath, entry->d_name);
+                    if (pathLen >= sizeof(fullPath)) {
+                        ESP_LOGE(TAG, "Path too long: %s/%s", dirPath, entry->d_name);
+                        continue;
+                    }
+                    if (stat(fullPath, &statbuf) == -1) {
+                        ESP_LOGE(TAG, "Failed to stat file: %s", fullPath);
+                        continue;
+                    }
+
+                    // Print file info
+                    if (S_ISDIR(statbuf.st_mode)) {
+                        printf("[DIR] %s\n", entry->d_name);
+                        // Recursively print subdirectory
+                        printDirectory(fullPath, depth + 1);
+                    } else {
+                        printf("[FILE] %s (%ld bytes)\n", entry->d_name, statbuf.st_size);
+                    }
+                }
+                closedir(dir);
+            }
 
             inline void init()
             {
@@ -93,16 +145,19 @@ namespace SD_CARD {
                     .quadhd_io_num = -1,
                     .max_transfer_sz = 4000,
                 };
-                ret = spi_bus_initialize((spi_host_device_t)SPI3_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
-                if (ret != ESP_OK) {
-                    ESP_LOGE(TAG, "Failed to initialize bus.");
-                    return;
+                // Only initialize SPI bus if not already initialized
+                if (spi_bus_get_attr((spi_host_device_t)SPI3_HOST) == NULL) {
+                    ret = spi_bus_initialize((spi_host_device_t)SPI3_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+                    if (ret != ESP_OK) {
+                        ESP_LOGE(TAG, "Failed to initialize bus.");
+                        return;
+                    }
                 }
 
                 // This initializes the slot without card detect (CD) and write protect (WP) signals.
                 sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
                 slot_config.gpio_cs = (gpio_num_t)_config.CS;     // CS pin
-                slot_config.host_id = (spi_host_device_t)SPI3_HOST;  // 使用SPI3_HOST
+                slot_config.host_id = (spi_host_device_t)SPI2_HOST;  // 使用SPI2_HOST
 
                 ESP_LOGI(TAG, "Mounting filesystem");
                 ret = esp_vfs_fat_sdspi_mount(_config.mountPoint.c_str(), &host, &slot_config, &mount_config, &card);

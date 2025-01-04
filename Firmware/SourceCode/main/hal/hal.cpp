@@ -101,7 +101,13 @@ void HAL::init()
     buzz.init(HAL_PIN_BUZZER);
 
     /* SD card */
-//    sd.init();
+    sd.init();
+
+    /* Serial */
+    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("HAL", ESP_LOG_VERBOSE);
+    esp_log_level_set("SD", ESP_LOG_VERBOSE);
+    ESP_LOGI("HAL", "Serial initialized");
 
     /* Lvgl */
     lvgl.init(&disp, &tp);

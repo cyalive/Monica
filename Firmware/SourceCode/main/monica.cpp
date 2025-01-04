@@ -151,6 +151,9 @@ extern "C" void app_main(void)
     /* Hardware init */
     hardware_manager.init();
 
+    // Print SD card contents
+    hardware_manager.sd.printDirectory("/sdcard");
+
     // Test display
     printf("Testing display with red color...\n");
     hardware_manager.disp.fillScreen(0xFF0000);  // 红色
