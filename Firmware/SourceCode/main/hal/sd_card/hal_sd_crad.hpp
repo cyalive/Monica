@@ -145,13 +145,11 @@ namespace SD_CARD {
                     .quadhd_io_num = -1,
                     .max_transfer_sz = 4000,
                 };
-                // Only initialize SPI bus if not already initialized
-                if (spi_bus_get_attr((spi_host_device_t)SPI3_HOST) == NULL) {
-                    ret = spi_bus_initialize((spi_host_device_t)SPI3_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
-                    if (ret != ESP_OK) {
-                        ESP_LOGE(TAG, "Failed to initialize bus.");
-                        return;
-                    }
+                // Initialize SPI bus
+                ret = spi_bus_initialize((spi_host_device_t)SPI2_HOST, &bus_cfg, SDSPI_DEFAULT_DMA);
+                if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
+                    ESP_LOGE(TAG, "Failed to initialize bus: %s", esp_err_to_name(ret));
+                    return;
                 }
 
                 // This initializes the slot without card detect (CD) and write protect (WP) signals.
